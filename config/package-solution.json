@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "copy-move-folder-client-side-solution",
+    "id": "e72ce8db-1f6d-4cd5-86de-3d85328ca659",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.18.1"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "Copy Move Folder description"
+      },
+      "longDescription": {
+        "default": "Copy Move Folder description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "copy-move-folder Feature",
+        "description": "The feature that activates elements of the copy-move-folder solution.",
+        "id": "91e5149b-8cac-4eb6-aede-2bd31fe847f6",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/copy-move-folder.sppkg"
+  }
+}
