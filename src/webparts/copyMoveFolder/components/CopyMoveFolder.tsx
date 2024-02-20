@@ -1,43 +1,96 @@
-import * as React from 'react';
-import styles from './CopyMoveFolder.module.scss';
-import type { ICopyMoveFolderProps } from './ICopyMoveFolderProps';
-import { escape } from '@microsoft/sp-lodash-subset';
+import * as React from "react";
+import "@pnp/sp/folders";
+import { ICopyMoveFolderProps } from "./ICopyMoveFolderProps";
+import { copyFolder, getAllFolders, moveFolder } from "../service/spservice";
+import { Modal } from "antd";
+import { FolderOutlined } from "@ant-design/icons";
+import styles from "./CopyMoveFolder.module.scss";
 
-export default class CopyMoveFolder extends React.Component<ICopyMoveFolderProps, {}> {
-  public render(): React.ReactElement<ICopyMoveFolderProps> {
-    const {
-      description,
-      isDarkTheme,
-      environmentMessage,
-      hasTeamsContext,
-      userDisplayName
-    } = this.props;
+const CopyMoveFolder = (props: ICopyMoveFolderProps) => {
+  const [folders, setFolders] = React.useState<any[]>([]);
+  const [successModalVisible, setSuccessModalVisible] = React.useState(false);
+  const [successMessage, setSuccessMessage] = React.useState("");
 
-    return (
-      <section className={`${styles.copyMoveFolder} ${hasTeamsContext ? styles.teams : ''}`}>
-        <div className={styles.welcome}>
-          <img alt="" src={isDarkTheme ? require('../assets/welcome-dark.png') : require('../assets/welcome-light.png')} className={styles.welcomeImage} />
-          <h2>Well done, {escape(userDisplayName)}!</h2>
-          <div>{environmentMessage}</div>
-          <div>Web part property value: <strong>{escape(description)}</strong></div>
-        </div>
-        <div>
-          <h3>Welcome to SharePoint Framework!</h3>
-          <p>
-            The SharePoint Framework (SPFx) is a extensibility model for Microsoft Viva, Microsoft Teams and SharePoint. It&#39;s the easiest way to extend Microsoft 365 with automatic Single Sign On, automatic hosting and industry standard tooling.
-          </p>
-          <h4>Learn more about SPFx development:</h4>
-          <ul className={styles.links}>
-            <li><a href="https://aka.ms/spfx" target="_blank" rel="noreferrer">SharePoint Framework Overview</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-graph" target="_blank" rel="noreferrer">Use Microsoft Graph in your solution</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-teams" target="_blank" rel="noreferrer">Build for Microsoft Teams using SharePoint Framework</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-viva" target="_blank" rel="noreferrer">Build for Microsoft Viva Connections using SharePoint Framework</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-store" target="_blank" rel="noreferrer">Publish SharePoint Framework applications to the marketplace</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-api" target="_blank" rel="noreferrer">SharePoint Framework API reference</a></li>
-            <li><a href="https://aka.ms/m365pnp" target="_blank" rel="noreferrer">Microsoft 365 Developer Community</a></li>
-          </ul>
-        </div>
-      </section>
-    );
-  }
-}
+  React.useEffect(() => {
+    const getFolders = async () => {
+      try {
+        const allFolders: any = await getAllFolders();
+        // Sort the folders alphabetically by name
+
+        setFolders(allFolders);
+        console.log("Folders", allFolders);
+      } catch (error) {
+        console.error("Error retrieving folders:", error);
+      }
+    };
+
+    getFolders();
+  }, []);
+
+  const handleCopy = async (folder: any) => {
+    try {
+      await copyFolder(folder);
+      const updatedFolders: any = await getAllFolders();
+      setFolders(updatedFolders);
+      setSuccessMessage("Folder copied successfully");
+      setSuccessModalVisible(true);
+    } catch (error) {
+      console.error("Error copying file:", error);
+    }
+  };
+
+  const handleMove = async (folder: any) => {
+    try {
+      await moveFolder(folder);
+      const updatedFolders: any = await getAllFolders();
+      setFolders(updatedFolders);
+      setSuccessMessage("Folder moved successfully");
+      setSuccessModalVisible(true);
+    } catch (error) {
+      console.error("Error moving file:", error);
+    }
+  };
+
+  const closeModal = () => {
+    setSuccessModalVisible(false);
+  };
+
+  return (
+    <div className={styles.container}>
+      <div className={styles.header}>Folders in RootFolder</div>
+      <div className={styles.foldersContainer}>
+        {folders.map((folder) => (
+          <div key={folder.UniqueId} className={styles.folderItem}>
+            <div style={{ marginBottom: "10px" }}>
+              {" "}
+              <FolderOutlined rev={undefined} />
+              {folder.Name}
+            </div>
+            <button
+              onClick={() => handleCopy(folder)}
+              className={styles.copyButton}
+            >
+              Copy
+            </button>
+            <button
+              onClick={() => handleMove(folder)}
+              className={styles.moveButton}
+            >
+              Move
+            </button>
+          </div>
+        ))}
+      </div>
+      <Modal
+        title="Success"
+        visible={successModalVisible}
+        onOk={closeModal}
+        onCancel={closeModal}
+      >
+        {successMessage}
+      </Modal>
+    </div>
+  );
+};
+
+export default CopyMoveFolder;
